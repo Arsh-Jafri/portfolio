@@ -160,10 +160,10 @@ const interests = [
 ];
 
 const experiences = [
-  { role: 'AI Engineering Co-op', company: 'PwC', date: 'Sept 2025 – Present', logo: '/pwc_logo.png', isCurrent: true },
-  { role: 'Software Engineering Intern', company: 'PlateMate', date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
+  { role: 'Software Engineer Intern', company: 'Ripple', date: 'Incoming May 2026', logo: null, isCurrent: true },
+  { role: 'AI Engineer Co-op', company: 'PwC', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
+  { role: 'Software Engineer Intern', company: 'PlateMate', date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
   { role: 'Software Lead', company: 'Disrupt Consulting', date: 'Dec 2024 – Present', logo: '/disrupt_logo.png', isCurrent: false },
-  { role: 'Software Developer', company: 'Forge', date: 'Dec 2024 – Apr 2025', logo: null, isCurrent: false },
 ];
 
 export default function BentoGrid() {
