@@ -18,7 +18,7 @@ const projects = [
     id: 1,
     title: 'Rover',
     description: 'An AI price adjustment agent that monitors your Gmail for receipts, tracks prices via web scraping, and contacts support to claim refunds when prices drop within return windows.',
-    tags: ['AI Agent', 'Fintech', 'Web Scraping', 'Price Tracker'],
+    tags: ['Python', 'AI Agent', 'Fintech', 'Web Scraping', 'Redis'],
     githubUrl: 'https://github.com/arsh-jafri/rover',
     buttons: [
       { type: 'github', url: 'https://github.com/arsh-jafri/rover' },
