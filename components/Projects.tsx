@@ -16,8 +16,19 @@ const springConfig = {
 const projects = [
   {
     id: 1,
+    title: 'Rover',
+    description: 'An AI price adjustment agent that monitors your Gmail for receipts, tracks prices via web scraping, and contacts support to claim refunds when prices drop within return windows.',
+    tags: ['AI Agent', 'Fintech', 'Web Scraping', 'Price Tracker'],
+    githubUrl: 'https://github.com/arsh-jafri/rover',
+    buttons: [
+      { type: 'github', url: 'https://github.com/arsh-jafri/rover' },
+      { type: 'visit', url: 'https://tryrover.app' },
+    ],
+  },
+  {
+    id: 2,
     title: 'Clearview',
-    description: 'A Chrome extension (300+ installs) that analyzes news articles for political bias and highlights flagged sections using NLP and sentiment analysis.',
+    description: 'An open-source Chrome extension (500+ installs) that analyzes news articles for political bias and highlights flagged sections using NLP and sentiment analysis.',
     tags: ['JavaScript', 'NLP', 'Sentiment Analysis', 'Web Scraping'],
     githubUrl: 'https://github.com/arsh-jafri/clearview',
     buttons: [
@@ -37,7 +48,7 @@ const projects = [
     ],
   },
   {
-    id: 4,
+    id: 3,
     title: 'StarkBot',
     description: 'RAG chatbot that answers Iron Man lore questions using official Marvel sources. Leverages PgVector for semantic search.',
     tags: ['Python', 'PgVector', 'RAG', 'FastAPI', 'React'],
@@ -47,7 +58,7 @@ const projects = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     title: 'Tripful',
     description: 'An AI-powered travel planner that uses live data (Google Places and Amadeus APIs) to generate personalized itineraries from user preferences.',
     tags: ['REST APIs', 'Node.js', 'TypeScript', 'LLM Orchestration'],
@@ -57,7 +68,7 @@ const projects = [
     ],
   },
   {
-    id: 6,
+    id: 5,
     title: 'Nexcap',
     description: 'Prototyped and pitched a crowdfunding app that allows retail investors access to private securities. Secured $1.5k in seed funding. ',
     tags: ['Fintech', 'React', 'TypeScript', 'Web3', 'Blockchain'],
@@ -67,7 +78,7 @@ const projects = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     title: "Dijkstra's Snake Game",
     description: 'A modern take on the classic Snake game featuring an AI opponent that uses Dijkstra\'s algorithm for intelligent pathfinding.',
     tags: ['Game Development', 'Dijkstra Algorithm', 'Pathfinding', 'Java'],
@@ -77,7 +88,7 @@ const projects = [
     ],
   },
   {
-    id: 5,
+    id: 7,
     title: 'PlateMate',
     description: 'A dish and restaurant recommendation app that uses taste, portion, and price preferences to provide hyper-personalized recommendations via an embedding-based algorithm.',
     tags: ['Python', 'Go', 'React Native', 'Recommender Systems', 'MongoDB'],
