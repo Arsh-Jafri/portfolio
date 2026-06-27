@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Dumbbell, BookOpen, Palette, CircleDotDashed, Utensils, Film, Music, Database, Github } from 'lucide-react';
+import { Dumbbell, BookOpen, Palette, CircleDotDashed, Utensils, Film, Music, Database, Github, ArrowUpRight } from 'lucide-react';
 import type { SVGProps } from 'react';
 import React from 'react';
 
@@ -150,11 +150,11 @@ const interests = [
 ];
 
 const experiences = [
-  { role: 'Software Engineer Intern', company: 'Ripple', date: 'May 2026 – Present', logo: null, isCurrent: true },
-  { role: 'President', company: 'Disrupt', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
-  { role: 'AI Engineer Co-op', company: 'PwC', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
-  { role: 'Software Engineer Intern', company: 'PlateMate', date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
-  { role: 'Software Lead', company: 'Disrupt', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
+  { role: 'Software Engineer Intern', company: 'Ripple', url: 'https://ripple.com', date: 'May 2026 – Present', logo: null, isCurrent: true },
+  { role: 'President', company: 'Disrupt', url: 'https://disruptnu.com/', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
+  { role: 'AI Engineer Co-op', company: 'PwC', url: 'https://www.pwc.com', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
+  { role: 'Software Engineer Intern', company: 'PlateMate', url: null, date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
+  { role: 'Software Lead', company: 'Disrupt', url: 'https://disruptnu.com/consulting', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
 ];
 
 export default function BentoGrid() {
@@ -206,7 +206,19 @@ export default function BentoGrid() {
                   {/* Experience text */}
                   <div className="flex flex-col justify-center">
                     <span className="text-sm md:text-base font-light text-[#F0F6FC]">{exp.role}</span>
-                    <span className="text-xs md:text-sm text-[#8B949E]">{exp.company}</span>
+                    {exp.url ? (
+                      <a
+                        href={exp.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group inline-flex items-center gap-0.5 text-xs md:text-sm text-[#8B949E] hover:text-[#F0F6FC] transition-colors w-fit"
+                      >
+                        {exp.company}
+                        <ArrowUpRight className="w-3 h-3 md:w-3.5 md:h-3.5 opacity-60 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+                    ) : (
+                      <span className="text-xs md:text-sm text-[#8B949E]">{exp.company}</span>
+                    )}
                     <span className="text-[10px] md:text-[11px] text-[#6E7681] mt-0.5">{exp.date}</span>
                   </div>
                 </div>
