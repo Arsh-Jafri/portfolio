@@ -21,18 +21,8 @@ const Map = dynamic(() => import('./ui/map').then((m) => m.Map), {
   loading: () => <div className="w-full h-full bg-[#161B22] rounded-full" />
 });
 
-// Premium ripple animation styles
-const rippleStyles = `
-  @keyframes ripple {
-    0% {
-      transform: scale(1);
-      opacity: 0.6;
-    }
-    100% {
-      transform: scale(2.5);
-      opacity: 0;
-    }
-  }
+// Marquee scroll animation styles
+const scrollStyles = `
   @keyframes scroll {
     0% {
       transform: translateX(0);
@@ -160,10 +150,11 @@ const interests = [
 ];
 
 const experiences = [
-  { role: 'Software Engineer Intern', company: 'Ripple', date: 'Incoming May 2026', logo: null, isCurrent: true },
+  { role: 'Software Engineer Intern', company: 'Ripple', date: 'May 2026 – Present', logo: null, isCurrent: true },
+  { role: 'President', company: 'Disrupt', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
   { role: 'AI Engineer Co-op', company: 'PwC', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
   { role: 'Software Engineer Intern', company: 'PlateMate', date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
-  { role: 'Software Lead', company: 'Disrupt Consulting', date: 'Dec 2024 – Present', logo: '/disrupt_logo.png', isCurrent: false },
+  { role: 'Software Lead', company: 'Disrupt', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
 ];
 
 export default function BentoGrid() {
@@ -202,21 +193,10 @@ export default function BentoGrid() {
                   <div className="relative z-10 flex-shrink-0">
                     {exp.isCurrent ? (
                       <div className="relative flex items-center justify-center">
-                        <style>{rippleStyles}</style>
                         {/* Solid background to hide the line */}
                         <div className="absolute w-4 h-4 rounded-full bg-[#161B22]" />
-                        {/* First ripple - slower */}
-                        <div 
-                          className="absolute w-4 h-4 rounded-full bg-[#22C55E]"
-                          style={{ animation: 'ripple 3s ease-out infinite' }}
-                        />
-                        {/* Second ripple - delayed */}
-                        <div 
-                          className="absolute w-4 h-4 rounded-full bg-[#22C55E]"
-                          style={{ animation: 'ripple 3s ease-out infinite 1.5s' }}
-                        />
-                        {/* Core dot - solid */}
-                        <div className="relative w-4 h-4 rounded-full bg-[#22C55E]" />
+                        {/* Solid filled dot to mark the current role */}
+                        <div className="relative w-4 h-4 rounded-full bg-[#F0F6FC]" />
                       </div>
                     ) : (
                       <div className="w-4 h-4 rounded-full bg-[#30363D]" />
@@ -313,7 +293,7 @@ export default function BentoGrid() {
       {/* Tech Card */}
       <SpotlightCard className="custom-spotlight-card col-span-1 md:col-span-4 min-h-[200px] md:min-h-0" spotlightColor="rgba(255, 255, 255, 0.08)">
         <div className="h-full flex flex-col px-4 md:px-5 py-4">
-          <style>{rippleStyles}</style>
+          <style>{scrollStyles}</style>
           {/* Tech Icons Carousel */}
           <div 
             className="overflow-hidden relative -mx-4 md:-mx-5"

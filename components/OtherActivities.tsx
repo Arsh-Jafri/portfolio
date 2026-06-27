@@ -78,8 +78,8 @@ const activities = [
   },
   {
     id: 2,
-    title: 'Director of Consulting & Software Lead @ Disrupt Consulting',
-    description: 'Leading pro-bono software initiatives and fintech strategy for high-growth startups.',
+    title: 'President @ Disrupt',
+    description: 'Leading the organization across pro-bono software initiatives and fintech strategy for high-growth startups.',
     image: '/disrupt-consulting.jpg',
     imagePosition: 'right',
   },
