@@ -175,7 +175,7 @@ export default function Hero() {
             variants={metadataVariants}
           >
             <motion.p variants={itemVariants}>CS + Econ @ Northeastern University</motion.p>
-            <motion.p variants={itemVariants}>SWE Intern @ Ripple</motion.p>
+            <motion.p variants={itemVariants}>SWE Intern @ Ripple · Incoming @ AWS</motion.p>
             <motion.p variants={itemVariants}>President @ Disrupt</motion.p>
           </motion.div>
 

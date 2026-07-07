@@ -28,12 +28,22 @@ const projects = [
   {
     id: 2,
     title: 'Clearview',
-    description: 'An open-source Chrome extension (500+ installs) that analyzes news articles for political bias and highlights flagged sections using NLP and sentiment analysis.',
+    description: 'An open-source Chrome extension (800+ installs) that analyzes news articles for political bias and highlights flagged sections using NLP and sentiment analysis.',
     tags: ['JavaScript', 'NLP', 'Sentiment Analysis', 'Web Scraping'],
     githubUrl: 'https://github.com/arsh-jafri/clearview',
     buttons: [
       { type: 'github', url: 'https://github.com/arsh-jafri/clearview' },
       { type: 'install', url: 'https://chromewebstore.google.com/detail/clearview-ai-powered-poli/eaaojgnnhjbcmggeepkpkemopfnjcpnb?hl=en&authuser=0' },
+    ],
+  },
+  {
+    id: 2,
+    title: 'Parallax',
+    description: 'A real-time crypto arbitrage scanner that tracks price spreads across Coinbase, Gemini, and Kraken, identifying fee-adjusted opportunities via live WebSocket feeds.',
+    tags: ['TypeScript', 'Go', 'WebSockets', 'Crypto', 'Arbitrage'],
+    githubUrl: 'https://github.com/Arsh-Jafri/parallax',
+    buttons: [
+      { type: 'github', url: 'https://github.com/Arsh-Jafri/parallax' },
     ],
   },
   {

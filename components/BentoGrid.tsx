@@ -150,10 +150,10 @@ const interests = [
 ];
 
 const experiences = [
+  { role: 'Software Development Engineer Intern', company: 'Amazon Web Services', url: 'https://aws.amazon.com', date: 'Incoming · Fall 2026', logo: null, isCurrent: true },
   { role: 'Software Engineer Intern', company: 'Ripple', url: 'https://ripple.com', date: 'May 2026 – Present', logo: null, isCurrent: true },
   { role: 'President', company: 'Disrupt', url: 'https://disruptnu.com/', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
   { role: 'AI Engineer Co-op', company: 'PwC', url: 'https://www.pwc.com', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
-  { role: 'Software Engineer Intern', company: 'PlateMate', url: null, date: 'Apr 2025 – Sept 2025', logo: '/platemate_logo.png', isCurrent: false },
   { role: 'Software Lead', company: 'Disrupt', url: 'https://disruptnu.com/consulting', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
 ];
 
@@ -184,6 +184,8 @@ export default function BentoGrid() {
           <div className="relative flex-1">
             {/* Vertical timeline line - starts and ends at circle centers */}
             <div className="absolute left-[7px] top-[24px] bottom-[24px] w-[2px] bg-[#30363D]" />
+            {/* Solid white segment connecting current roles (AWS → Ripple → Disrupt) */}
+            <div className="absolute left-[7px] top-[24px] w-[2px] bg-[#F0F6FC]" style={{ height: 'calc((100% - 48px) * 2 / 4)' }} />
             
             {/* Timeline items */}
             <div className="flex flex-col justify-between h-full gap-4 md:gap-0">
