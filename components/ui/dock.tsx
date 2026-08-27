@@ -1,14 +1,8 @@
 "use client"
 
-import React, { PropsWithChildren, useRef, useEffect, useState } from "react"
+import React, { PropsWithChildren, useEffect, useState } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import {
-  motion,
-  MotionValue,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion"
+import { motion } from "framer-motion"
 import type { MotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
@@ -19,8 +13,6 @@ export interface DockProps extends VariantProps<typeof dockVariants> {
   iconMagnification?: number
   iconMagnificationMobile?: number
   disableMagnification?: boolean
-  iconDistance?: number
-  iconDistanceMobile?: number
   direction?: "top" | "middle" | "bottom"
   children: React.ReactNode
 }
@@ -28,9 +20,10 @@ export interface DockProps extends VariantProps<typeof dockVariants> {
 const DEFAULT_SIZE = 40
 const DEFAULT_MAGNIFICATION = 60
 const DEFAULT_MAGNIFICATION_MOBILE = 80
-const DEFAULT_DISTANCE = 140
-const DEFAULT_DISTANCE_MOBILE = 100
 const DEFAULT_DISABLEMAGNIFICATION = false
+
+// Shared by the icon scale and the dock's width so they move in lockstep
+const DOCK_SPRING = { type: "spring" as const, mass: 0.1, stiffness: 150, damping: 12 }
 
 const dockVariants = cva(
   "mx-auto flex h-[80px] w-max items-center justify-center gap-2 sm:gap-3 rounded-3xl border p-2 sm:p-3 backdrop-blur-xl overflow-hidden"
@@ -45,14 +38,11 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
       iconMagnification = DEFAULT_MAGNIFICATION,
       iconMagnificationMobile = DEFAULT_MAGNIFICATION_MOBILE,
       disableMagnification = DEFAULT_DISABLEMAGNIFICATION,
-      iconDistance = DEFAULT_DISTANCE,
-      iconDistanceMobile = DEFAULT_DISTANCE_MOBILE,
       direction = "middle",
       ...props
     },
     ref
   ) => {
-    const mouseX = useMotionValue(Infinity)
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -66,7 +56,6 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     }, [])
 
     const currentMagnification = isMobile ? iconMagnificationMobile : iconMagnification
-    const currentDistance = isMobile ? iconDistanceMobile : iconDistance
     const currentDisableMagnification = isMobile ? true : disableMagnification
 
     const renderChildren = () => {
@@ -77,11 +66,9 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
         ) {
           return React.cloneElement(child, {
             ...child.props,
-            mouseX: mouseX,
             size: iconSize,
             magnification: currentMagnification,
             disableMagnification: currentDisableMagnification,
-            distance: currentDistance,
           })
         }
         return child
@@ -91,22 +78,6 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     return (
       <motion.div
         ref={ref}
-        onMouseMove={(e) => {
-          mouseX.set(e.pageX)
-        }}
-        onMouseLeave={() => mouseX.set(Infinity)}
-        onTouchStart={(e) => {
-          if (e.touches.length > 0) {
-            mouseX.set(e.touches[0].pageX)
-          }
-        }}
-        onTouchMove={(e) => {
-          if (e.touches.length > 0) {
-            mouseX.set(e.touches[0].pageX)
-          }
-        }}
-        onTouchEnd={() => mouseX.set(Infinity)}
-        onTouchCancel={() => mouseX.set(Infinity)}
         {...props}
         className={cn(dockVariants({ className }), {
           "items-start": direction === "top",
@@ -129,8 +100,6 @@ export interface DockIconProps extends Omit<
   size?: number
   magnification?: number
   disableMagnification?: boolean
-  distance?: number
-  mouseX?: MotionValue<number>
   className?: string
   children?: React.ReactNode
   props?: PropsWithChildren
@@ -141,49 +110,49 @@ const DockIcon = ({
   size = DEFAULT_SIZE,
   magnification = DEFAULT_MAGNIFICATION,
   disableMagnification,
-  distance = DEFAULT_DISTANCE,
-  mouseX,
   className,
   children,
   isActive = false,
   ...props
 }: DockIconProps) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
   const padding = Math.max(6, size * 0.2)
-  const defaultMouseX = useMotionValue(Infinity)
 
-  const distanceCalc = useTransform(mouseX ?? defaultMouseX, (val: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
-    return val - bounds.x - bounds.width / 2
-  })
-
-  const targetSize = disableMagnification ? size : magnification
-
-  const sizeTransform = useTransform(
-    distanceCalc,
-    [-distance, 0, distance],
-    [size, targetSize, size]
-  )
-
-  const scaleSize = useSpring(sizeTransform, {
-    mass: 0.1,
-    stiffness: 150,
-    damping: 12,
-  })
+  const canMagnify = !disableMagnification && magnification > size
+  const active = canMagnify && isHovered
+  // Horizontal room the magnified circle needs on each side of its resting box.
+  const overhang = canMagnify ? (magnification - size) / 2 : 0
 
   return (
+    // The wrapper claims the extra width in layout, so the dock's w-max grows and
+    // shrinks with the icon. The dock is centre-anchored, so adding `overhang` to
+    // both sides widens it by 2x overhang and shifts its left edge left by exactly
+    // overhang - which leaves this wrapper sitting still while its neighbours part
+    // around it. A hovered icon therefore never moves out from under the cursor.
     <motion.div
-      ref={ref}
-      style={{ width: scaleSize, height: scaleSize, padding }}
-      whileTap={{ scale: 1.08 }}
-      className={cn(
-        "flex aspect-square cursor-pointer items-center justify-center rounded-full transition-all",
-        isActive ? "bg-accent pill-button" : "bg-transparent hover:bg-white/10",
-        className
-      )}
-      {...props}
+      style={{ width: size, height: size }}
+      animate={{ marginLeft: active ? overhang : 0, marginRight: active ? overhang : 0 }}
+      transition={DOCK_SPRING}
+      className="relative flex flex-shrink-0 items-center justify-center"
     >
-      <div>{children}</div>
+      {/* Scale lives on the inner element so the full magnified circle stays
+          hoverable; growing about the centre can only ever add area under the
+          cursor, never take it away. */}
+      <motion.div
+        style={{ padding }}
+        animate={{ scale: active ? magnification / size : 1 }}
+        transition={DOCK_SPRING}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className={cn(
+          "absolute inset-0 z-0 flex aspect-square cursor-pointer items-center justify-center rounded-full transition-colors hover:z-10",
+          isActive ? "bg-accent pill-button" : "bg-transparent hover:bg-white/10",
+          className
+        )}
+        {...props}
+      >
+        <motion.div whileTap={{ scale: 1.08 }}>{children}</motion.div>
+      </motion.div>
     </motion.div>
   )
 }
@@ -191,4 +160,3 @@ const DockIcon = ({
 DockIcon.displayName = "DockIcon"
 
 export { Dock, DockIcon, dockVariants }
-

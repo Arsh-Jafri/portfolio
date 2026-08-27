@@ -155,8 +155,6 @@ export default function FloatingDock() {
         iconSize={56}
         iconMagnification={80}
         iconMagnificationMobile={90}
-        iconDistance={180}
-        iconDistanceMobile={80}
       >
         <DockIcon 
           onClick={() => scrollToSection('hero')}
