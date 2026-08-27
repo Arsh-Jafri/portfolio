@@ -181,32 +181,38 @@ export default function BentoGrid() {
       <SpotlightCard className="custom-spotlight-card col-span-1 md:col-span-5 md:row-span-2 min-h-[320px] md:min-h-0" spotlightColor="rgba(255, 255, 255, 0.08)">
         <div className="h-full flex flex-col px-4 md:px-5 py-4">
           <h3 className="text-sm uppercase tracking-widest text-[#8B949E] mb-4">My Experience</h3>
-          <div className="relative flex-1">
-            {/* Vertical timeline line - starts and ends at circle centers */}
-            <div className="absolute left-[7px] top-[24px] bottom-[24px] w-[2px] bg-[#30363D]" />
-            {/* Solid white segment connecting current roles (AWS → Disrupt) */}
-            <div className="absolute left-[7px] top-[24px] w-[2px] bg-[#F0F6FC]" style={{ height: 'calc((100% - 48px) * 1 / 4)' }} />
-            
-            {/* Timeline items */}
-            <div className="flex flex-col justify-between h-full gap-4 md:gap-0">
-              {experiences.map((exp, index) => (
-                <div key={index} className="flex items-center gap-4 md:gap-8 relative">
-                  {/* Timeline dot */}
-                  <div className="relative z-10 flex-shrink-0">
-                    {exp.isCurrent ? (
-                      <div className="relative flex items-center justify-center">
-                        {/* Solid background to hide the line */}
-                        <div className="absolute w-4 h-4 rounded-full bg-[#161B22]" />
-                        {/* Solid filled dot to mark the current role */}
-                        <div className="relative w-4 h-4 rounded-full bg-[#F0F6FC]" />
-                      </div>
-                    ) : (
-                      <div className="w-4 h-4 rounded-full bg-[#30363D]" />
-                    )}
+          <div className="flex-1 flex flex-col">
+            {experiences.map((exp, index) => {
+              const isFirst = index === 0
+              const isLast = index === experiences.length - 1
+              // A segment is highlighted only when the roles at both of its ends are current
+              const segmentAbove = !isFirst && exp.isCurrent && experiences[index - 1].isCurrent
+              const segmentBelow = !isLast && exp.isCurrent && experiences[index + 1].isCurrent
+
+              return (
+                <div key={index} className="flex items-stretch gap-4 md:gap-8 flex-1 min-h-[3.25rem]">
+                  {/* Timeline dot with connectors that flex to fill the row, so the
+                      line always meets the dot centers regardless of row height */}
+                  <div className="flex flex-col items-center flex-shrink-0 w-4">
+                    <div
+                      className={`w-[2px] flex-1 ${
+                        isFirst ? 'bg-transparent' : segmentAbove ? 'bg-[#F0F6FC]' : 'bg-[#30363D]'
+                      }`}
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full flex-shrink-0 ${
+                        exp.isCurrent ? 'bg-[#F0F6FC]' : 'bg-[#30363D]'
+                      }`}
+                    />
+                    <div
+                      className={`w-[2px] flex-1 ${
+                        isLast ? 'bg-transparent' : segmentBelow ? 'bg-[#F0F6FC]' : 'bg-[#30363D]'
+                      }`}
+                    />
                   </div>
-                  
+
                   {/* Experience text */}
-                  <div className="flex flex-col justify-center">
+                  <div className="flex flex-col justify-center min-w-0">
                     <span className="text-sm md:text-base font-light text-[#F0F6FC]">{exp.role}</span>
                     {exp.url ? (
                       <a
@@ -224,8 +230,8 @@ export default function BentoGrid() {
                     <span className="text-[10px] md:text-[11px] text-[#6E7681] mt-0.5">{exp.date}</span>
                   </div>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </div>
       </SpotlightCard>
