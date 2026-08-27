@@ -13,10 +13,34 @@ interface MapProps {
   markerColor?: string;
 }
 
-export function Map({ 
-  center = [-71.0589, 42.3601], 
-  zoom = 11, 
-  className = "", 
+/**
+ * Tearing a map down while its style/tiles are still loading (React StrictMode's
+ * dev double-mount, or a fast unmount) makes MapLibre abort those fetches. The
+ * resulting AbortError surfaces as an async rejection, so a try/catch around
+ * remove() can't see it. Suppress it with a listener that is installed once and
+ * only reacts while at least one Map is mounted.
+ */
+let mountedMaps = 0;
+let rejectionHandlerInstalled = false;
+
+function isAbortError(reason: unknown): boolean {
+  return (reason as { name?: string } | null)?.name === "AbortError";
+}
+
+function installRejectionHandler() {
+  if (rejectionHandlerInstalled || typeof window === "undefined") return;
+  rejectionHandlerInstalled = true;
+  window.addEventListener("unhandledrejection", (event) => {
+    if (mountedMaps > 0 && isAbortError(event.reason)) {
+      event.preventDefault();
+    }
+  });
+}
+
+export function Map({
+  center = [-71.0589, 42.3601],
+  zoom = 11,
+  className = "",
   children,
   marker,
   markerColor = "#1E6EF4"
@@ -28,18 +52,13 @@ export function Map({
 
   useEffect(() => {
     isMounted.current = true;
-    
+
     if (!mapContainer.current || map.current) return;
 
+    installRejectionHandler();
+    mountedMaps += 1;
+
     let currentMap: maplibregl.Map | null = null;
-    
-    // Suppress AbortError that may bubble up during cleanup
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason?.name === 'AbortError') {
-        event.preventDefault();
-      }
-    };
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     try {
       // CARTO basemap - dark theme
@@ -60,12 +79,9 @@ export function Map({
         touchPitch: false,
       });
 
-      // Handle AbortError silently - this happens during cleanup
+      // Aborted requests are expected during cleanup - ignore them
       currentMap.on("error", (e) => {
-        if (e.error?.name === "AbortError") {
-          // Silently ignore AbortError - expected during cleanup
-          return;
-        }
+        if (isAbortError(e.error)) return;
         console.error("Map error:", e.error);
       });
 
@@ -75,7 +91,7 @@ export function Map({
       if (marker && currentMap) {
         const addMarker = () => {
           if (!isMounted.current || !map.current) return;
-          
+
           // Remove existing marker if any
           if (markerRef.current) {
             markerRef.current.remove();
@@ -113,8 +129,7 @@ export function Map({
 
     return () => {
       isMounted.current = false;
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      
+
       if (markerRef.current) {
         try {
           markerRef.current.remove();
@@ -123,33 +138,27 @@ export function Map({
         }
         markerRef.current = null;
       }
-      if (map.current) {
-        const mapToRemove = map.current;
-        map.current = null;
-        
-        // Check if map is in a valid state before removing
-        if ((mapToRemove as unknown as { _removed?: boolean })._removed) return;
-        
-        // Cancel any pending requests before removal
+
+      const mapToRemove = map.current;
+      map.current = null;
+
+      if (mapToRemove && !(mapToRemove as unknown as { _removed?: boolean })._removed) {
         try {
           mapToRemove.stop();
         } catch {
-          // Ignore errors from stopping
+          // Ignore errors from stopping pending operations
         }
-        
-        // Delay removal slightly to allow pending operations to complete
-        setTimeout(() => {
-          try {
-            // Double-check map hasn't been removed
-            if (!(mapToRemove as unknown as { _removed?: boolean })._removed) {
-              mapToRemove.remove();
-            }
-          } catch {
-            // Map may already be removed or aborted (e.g., AbortError)
-            // Silently handle the error as the map is being cleaned up anyway
-          }
-        }, 0);
+        try {
+          mapToRemove.remove();
+        } catch {
+          // Map may already be torn down
+        }
       }
+
+      // Keep suppressing aborts until the teardown's async fallout has settled.
+      setTimeout(() => {
+        mountedMaps = Math.max(0, mountedMaps - 1);
+      }, 0);
     };
   }, [center, zoom, marker, markerColor]);
 
