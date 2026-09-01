@@ -2,7 +2,7 @@
 
 import React, { PropsWithChildren, useEffect, useState } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion } from "framer-motion"
+import { motion, useAnimationControls } from "framer-motion"
 import type { MotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
@@ -19,14 +19,18 @@ export interface DockProps extends VariantProps<typeof dockVariants> {
 
 const DEFAULT_SIZE = 40
 const DEFAULT_MAGNIFICATION = 60
-const DEFAULT_MAGNIFICATION_MOBILE = 80
+const DEFAULT_MAGNIFICATION_MOBILE = 60
 const DEFAULT_DISABLEMAGNIFICATION = false
 
-// Shared by the icon scale and the dock's width so they move in lockstep
-const DOCK_SPRING = { type: "spring" as const, mass: 0.1, stiffness: 150, damping: 12 }
+// Shared by the icon scale and the dock's width so they move in lockstep.
+// Damping ratio ~0.74 with a low natural frequency, so the icon eases up over
+// ~0.3s with a little follow-through instead of snapping to size.
+const DOCK_SPRING = { type: "spring" as const, mass: 1, stiffness: 260, damping: 24 }
 
+// overflow must stay visible: a magnified circle is taller than the dock's
+// content box, and clipping it flattens the circle into an oval.
 const dockVariants = cva(
-  "mx-auto flex h-[80px] w-max items-center justify-center gap-2 sm:gap-3 rounded-3xl border p-2 sm:p-3 backdrop-blur-xl overflow-hidden"
+  "mx-auto flex h-[80px] w-max items-center justify-center gap-2 sm:gap-3 rounded-3xl border p-2 sm:p-3 backdrop-blur-xl overflow-visible"
 )
 
 const Dock = React.forwardRef<HTMLDivElement, DockProps>(
@@ -44,19 +48,29 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
     ref
   ) => {
     const [isMobile, setIsMobile] = useState(false)
+    // Touch devices synthesise a hover on tap and leave it stuck on the tapped
+    // icon, so hover-driven magnification has to be gated on real hover support
+    // rather than on viewport width alone.
+    const [canHover, setCanHover] = useState(false)
 
     useEffect(() => {
       if (typeof window === "undefined") return
-      const checkMobile = () => {
-        setIsMobile(window.matchMedia("(max-width: 639px)").matches)
+      const width = window.matchMedia("(max-width: 639px)")
+      const hover = window.matchMedia("(hover: hover) and (pointer: fine)")
+      const sync = () => {
+        setIsMobile(width.matches)
+        setCanHover(hover.matches)
       }
-      checkMobile()
-      window.addEventListener("resize", checkMobile)
-      return () => window.removeEventListener("resize", checkMobile)
+      sync()
+      width.addEventListener("change", sync)
+      hover.addEventListener("change", sync)
+      return () => {
+        width.removeEventListener("change", sync)
+        hover.removeEventListener("change", sync)
+      }
     }, [])
 
     const currentMagnification = isMobile ? iconMagnificationMobile : iconMagnification
-    const currentDisableMagnification = isMobile ? true : disableMagnification
 
     const renderChildren = () => {
       return React.Children.map(children, (child) => {
@@ -68,7 +82,8 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
             ...child.props,
             size: iconSize,
             magnification: currentMagnification,
-            disableMagnification: currentDisableMagnification,
+            disableMagnification: disableMagnification || !canHover,
+            supportsHover: canHover,
           })
         }
         return child
@@ -100,6 +115,7 @@ export interface DockIconProps extends Omit<
   size?: number
   magnification?: number
   disableMagnification?: boolean
+  supportsHover?: boolean
   className?: string
   children?: React.ReactNode
   props?: PropsWithChildren
@@ -110,18 +126,43 @@ const DockIcon = ({
   size = DEFAULT_SIZE,
   magnification = DEFAULT_MAGNIFICATION,
   disableMagnification,
+  supportsHover = true,
   className,
   children,
   isActive = false,
+  onClick,
   ...props
 }: DockIconProps) => {
   const [isHovered, setIsHovered] = useState(false)
+  const controls = useAnimationControls()
   const padding = Math.max(6, size * 0.2)
 
+  // Without hover there is nothing to magnify against, so the selected icon
+  // announces itself with a one-shot pulse instead.
+  const pulseOnActive = !supportsHover
   const canMagnify = !disableMagnification && magnification > size
-  const active = canMagnify && isHovered
+  const magnified = canMagnify && isHovered
   // Horizontal room the magnified circle needs on each side of its resting box.
   const overhang = canMagnify ? (magnification - size) / 2 : 0
+
+  // Hover-driven magnification (pointer devices)
+  useEffect(() => {
+    if (pulseOnActive) return
+    controls.start({ scale: magnified ? magnification / size : 1 }, DOCK_SPRING)
+  }, [controls, magnified, magnification, size, pulseOnActive])
+
+  // Selection pulse (touch devices): only on a deliberate tap, so scrolling
+  // between sections simply moves the circle without any bounce.
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (pulseOnActive) {
+      controls.start({
+        // Pop past the target, dip just under, then settle
+        scale: [1, magnification / size, 0.98, 1],
+        transition: { duration: 0.42, times: [0, 0.38, 0.7, 1], ease: "easeOut" },
+      })
+    }
+    onClick?.(event)
+  }
 
   return (
     // The wrapper claims the extra width in layout, so the dock's w-max grows and
@@ -131,7 +172,7 @@ const DockIcon = ({
     // around it. A hovered icon therefore never moves out from under the cursor.
     <motion.div
       style={{ width: size, height: size }}
-      animate={{ marginLeft: active ? overhang : 0, marginRight: active ? overhang : 0 }}
+      animate={{ marginLeft: magnified ? overhang : 0, marginRight: magnified ? overhang : 0 }}
       transition={DOCK_SPRING}
       className="relative flex flex-shrink-0 items-center justify-center"
     >
@@ -139,14 +180,17 @@ const DockIcon = ({
           hoverable; growing about the centre can only ever add area under the
           cursor, never take it away. */}
       <motion.div
-        style={{ padding }}
-        animate={{ scale: active ? magnification / size : 1 }}
-        transition={DOCK_SPRING}
+        style={{ width: size, height: size, padding }}
+        initial={{ scale: 1 }}
+        animate={controls}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
+        onClick={handleClick}
         className={cn(
-          "absolute inset-0 z-0 flex aspect-square cursor-pointer items-center justify-center rounded-full transition-colors hover:z-10",
-          isActive ? "bg-accent pill-button" : "bg-transparent hover:bg-white/10",
+          "absolute z-0 flex items-center justify-center rounded-full transition-colors hover:z-10",
+          isActive
+            ? "bg-accent pill-button"
+            : cn("bg-transparent", supportsHover && "hover:bg-white/10"),
           className
         )}
         {...props}

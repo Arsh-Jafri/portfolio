@@ -149,8 +149,20 @@ const interests = [
   { text: 'Listening to music', icon: Music },
 ];
 
-const experiences = [
-  { role: 'Software Development Engineer Intern', company: 'Amazon Web Services', url: 'https://aws.amazon.com', date: 'Sept 2026 – Present', logo: null, isCurrent: true },
+type Experience = {
+  role: string
+  // Used below the md breakpoint, where the full title wraps to two lines and
+  // throws off the even spacing of the timeline rows
+  shortRole?: string
+  company: string
+  url: string
+  date: string
+  logo: string | null
+  isCurrent: boolean
+}
+
+const experiences: Experience[] = [
+  { role: 'Software Development Engineer Intern', shortRole: 'SDE Intern', company: 'Amazon Web Services', url: 'https://aws.amazon.com', date: 'Sept 2026 – Present', logo: null, isCurrent: true },
   { role: 'President', company: 'Disrupt', url: 'https://disruptnu.com/', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
   { role: 'Software Engineer Intern', company: 'Ripple', url: 'https://ripple.com', date: 'May 2026 – Aug 2026', logo: null, isCurrent: false },
   { role: 'AI Engineer Co-op', company: 'PwC', url: 'https://www.pwc.com', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
@@ -190,7 +202,7 @@ export default function BentoGrid() {
               const segmentBelow = !isLast && exp.isCurrent && experiences[index + 1].isCurrent
 
               return (
-                <div key={index} className="flex items-stretch gap-4 md:gap-8 flex-1 min-h-[3.25rem]">
+                <div key={index} className="flex items-stretch gap-4 md:gap-8 flex-1 min-h-[4.75rem] md:min-h-0">
                   {/* Timeline dot with connectors that flex to fill the row, so the
                       line always meets the dot centers regardless of row height */}
                   <div className="flex flex-col items-center flex-shrink-0 w-4">
@@ -213,7 +225,10 @@ export default function BentoGrid() {
 
                   {/* Experience text */}
                   <div className="flex flex-col justify-center min-w-0">
-                    <span className="text-sm md:text-base font-light text-[#F0F6FC]">{exp.role}</span>
+                    <span className="text-sm md:text-base font-light text-[#F0F6FC]">
+                      <span className="md:hidden">{exp.shortRole ?? exp.role}</span>
+                      <span className="hidden md:inline">{exp.role}</span>
+                    </span>
                     {exp.url ? (
                       <a
                         href={exp.url}

@@ -153,16 +153,16 @@ export default function FloatingDock() {
       <Dock 
         className="pointer-events-auto bg-[#0B0C10]/20 backdrop-blur-xl border-[#30363D]/50 shadow-none sm:shadow-2xl"
         iconSize={56}
-        iconMagnification={80}
-        iconMagnificationMobile={90}
+        iconMagnification={76}
+        iconMagnificationMobile={72}
       >
         <DockIcon 
           onClick={() => scrollToSection('hero')}
           isActive={activeSection === 'hero'}
         >
           <Home className={cn(
-            "w-8 h-8",
-            activeSection === 'hero' ? "text-white" : "text-white/70"
+            "w-8 h-8 text-white transition-opacity",
+            activeSection === 'hero' ? "opacity-100" : "opacity-70"
           )} />
         </DockIcon>
         <DockIcon 
@@ -170,8 +170,8 @@ export default function FloatingDock() {
           isActive={activeSection === 'about'}
         >
           <User className={cn(
-            "w-8 h-8",
-            activeSection === 'about' ? "text-white" : "text-white/70"
+            "w-8 h-8 text-white transition-opacity",
+            activeSection === 'about' ? "opacity-100" : "opacity-70"
           )} />
         </DockIcon>
         <DockIcon 
@@ -179,8 +179,8 @@ export default function FloatingDock() {
           isActive={activeSection === 'projects'}
         >
           <Folder className={cn(
-            "w-8 h-8",
-            activeSection === 'projects' ? "text-white" : "text-white/70"
+            "w-8 h-8 text-white transition-opacity",
+            activeSection === 'projects' ? "opacity-100" : "opacity-70"
           )} />
         </DockIcon>
         <DockIcon 
@@ -188,8 +188,8 @@ export default function FloatingDock() {
           isActive={activeSection === 'tech'}
         >
           <CodeXml className={cn(
-            "w-8 h-8",
-            activeSection === 'tech' ? "text-white" : "text-white/70"
+            "w-8 h-8 text-white transition-opacity",
+            activeSection === 'tech' ? "opacity-100" : "opacity-70"
           )} />
         </DockIcon>
         <DockIcon 
@@ -197,8 +197,8 @@ export default function FloatingDock() {
           isActive={activeSection === 'activities'}
         >
           <Cross className={cn(
-            "w-8 h-8",
-            activeSection === 'activities' ? "text-white" : "text-white/70"
+            "w-8 h-8 text-white transition-opacity",
+            activeSection === 'activities' ? "opacity-100" : "opacity-70"
           )} />
         </DockIcon>
       </Dock>
