@@ -142,7 +142,25 @@ export function Map({
       const mapToRemove = map.current;
       map.current = null;
 
-      if (mapToRemove && !(mapToRemove as unknown as { _removed?: boolean })._removed) {
+      const releaseSuppression = () => {
+        // Keep suppressing aborts until the teardown's async fallout has settled.
+        setTimeout(() => {
+          mountedMaps = Math.max(0, mountedMaps - 1);
+        }, 0);
+      };
+
+      if (!mapToRemove || (mapToRemove as unknown as { _removed?: boolean })._removed) {
+        releaseSuppression();
+        return;
+      }
+
+      let torndown = false;
+      let fallback: ReturnType<typeof setTimeout> | undefined;
+
+      const teardown = () => {
+        if (torndown) return;
+        torndown = true;
+        if (fallback) clearTimeout(fallback);
         try {
           mapToRemove.stop();
         } catch {
@@ -153,12 +171,23 @@ export function Map({
         } catch {
           // Map may already be torn down
         }
-      }
+        releaseSuppression();
+      };
 
-      // Keep suppressing aborts until the teardown's async fallout has settled.
-      setTimeout(() => {
-        mountedMaps = Math.max(0, mountedMaps - 1);
-      }, 0);
+      // Calling remove() mid-load aborts the in-flight style request, and
+      // MapLibre surfaces that rejection asynchronously - a try/catch here can't
+      // see it, and Next's dev overlay registers its own unhandledrejection
+      // listener before this module loads, so it reports the error no matter what
+      // we preventDefault(). Letting the style settle first means there is
+      // nothing to abort. The map briefly outlives the component; the fallback
+      // covers a style that never resolves.
+      if (mapToRemove.loaded()) {
+        teardown();
+      } else {
+        fallback = setTimeout(teardown, 5000);
+        mapToRemove.once("load", teardown);
+        mapToRemove.once("error", teardown);
+      }
     };
   }, [center, zoom, marker, markerColor]);
 

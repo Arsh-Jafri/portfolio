@@ -166,7 +166,7 @@ const experiences: Experience[] = [
   { role: 'President', company: 'Disrupt', url: 'https://disruptnu.com/', date: 'Apr 2026 – Present', logo: '/disrupt_logo.png', isCurrent: true },
   { role: 'Software Engineer Intern', company: 'Ripple', url: 'https://ripple.com', date: 'May 2026 – Aug 2026', logo: null, isCurrent: false },
   { role: 'AI Engineer Co-op', company: 'PwC', url: 'https://www.pwc.com', date: 'Sept 2025 – Jan 2026', logo: '/pwc_logo.png', isCurrent: false },
-  { role: 'Software Lead', company: 'Disrupt', url: 'https://disruptnu.com/consulting', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
+  { role: 'Software Lead', company: 'Disrupt Consulting', url: 'https://disruptnu.com/consulting', date: 'Dec 2024 – Apr 2026', logo: '/disrupt_logo.png', isCurrent: false },
 ];
 
 export default function BentoGrid() {

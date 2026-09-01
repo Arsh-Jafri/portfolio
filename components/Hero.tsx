@@ -199,7 +199,7 @@ export default function Hero() {
               transition={springConfig}
               onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              See my work
+              See my projects
             </motion.button>
           </motion.div>
 

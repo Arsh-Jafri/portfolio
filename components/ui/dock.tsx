@@ -187,7 +187,7 @@ const DockIcon = ({
         onHoverEnd={() => setIsHovered(false)}
         onClick={handleClick}
         className={cn(
-          "absolute z-0 flex items-center justify-center rounded-full transition-colors hover:z-10",
+          "absolute z-0 flex cursor-pointer items-center justify-center rounded-full transition-colors hover:z-10",
           isActive
             ? "bg-accent pill-button"
             : cn("bg-transparent", supportsHover && "hover:bg-white/10"),
